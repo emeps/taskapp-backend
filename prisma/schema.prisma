@@ -13,11 +13,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
 model Users {
-  id    Int     @id @default(autoincrement())
-  email String  @unique @db.VarChar(255)
-  name  String  @db.VarChar(255)
-  password String  @db.VarChar(255)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @updatedAt @db.Timestamp(0)
+  tasks     Tasks[]
+}
+
+model Tasks {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.LongText()
+  status      Status   @default(PENDING)
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime @updatedAt @db.Timestamp(0)
+  userId      Int
+  user        Users    @relation(fields: [userId], references: [id])
 }
