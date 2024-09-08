@@ -34,6 +34,7 @@ export class UserService {
     return {
       status: HttpStatus.CREATED,
       message: 'Usuário criado com sucesso!',
+      data: newUser
     };
   }
 
