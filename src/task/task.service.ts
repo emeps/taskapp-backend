@@ -8,6 +8,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Status } from '@prisma/client';
+import { StatusTaskDto } from './dto/status-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -15,6 +16,7 @@ export class TaskService {
 
   private readonly dataFormat = {
     select: {
+      id:true,
       title: true,
       description: true,
       status: true,
@@ -29,13 +31,13 @@ export class TaskService {
     },
   };
 
-  async create(createTaskDto: CreateTaskDto) {
+  async create(req, createTaskDto: CreateTaskDto) {
     const newTask = await this.prisma.tasks.create({
       data: {
         title: createTaskDto.title,
         description: createTaskDto.description,
         status: createTaskDto.status as unknown as Status,
-        userId: createTaskDto.userId,
+        userId: req.tokenPayload.sub,
       },
     });
 
@@ -46,13 +48,13 @@ export class TaskService {
     };
   }
 
-  async findAll() {
-    const tasks = await this.prisma.tasks.findMany(this.dataFormat);
-
-    if (tasks.length === 0) {
-      throw new NotFoundException('Não foi possível encontrar nenhuma tarefa!');
-    }
-
+  async findAll(userId:number) {
+    const tasks = await this.prisma.tasks.findMany({
+      where: {
+        userId
+      },
+      ...this.dataFormat,
+    });
     return {
       status: HttpStatus.OK,
       data: tasks,
@@ -71,7 +73,7 @@ export class TaskService {
     };
   }
 
-  async update(id: number, updateTaskDto: UpdateTaskDto) {
+  async update(req, id: number, updateTaskDto: UpdateTaskDto) {
     const taskFound = await this.prisma.tasks.findUnique({
       where: { id },
     });
@@ -85,7 +87,7 @@ export class TaskService {
         title: updateTaskDto.title,
         description: updateTaskDto.description,
         status: updateTaskDto.status as unknown as Status,
-        userId: updateTaskDto.userId,
+        userId: req.tokenPayload.sub,
       },
       where: { id },
     });
@@ -96,10 +98,10 @@ export class TaskService {
     };
   }
 
-  async remove(id: number) {
+  async remove(req, id: number) {
     try {
       const task = await this.prisma.tasks.delete({
-        where: { id },
+        where: { id, userId:req.tokenPayload.sub},
       });
       if (task) {
         return {
@@ -111,5 +113,26 @@ export class TaskService {
     } catch (e) {
       throw new NotFoundException('Não foi possível encontrar nenhuma tarefa!');
     }
+  }
+
+  async statusChange(req, id: number, statusTaskDto: StatusTaskDto) {
+    const taskFound = await this.prisma.tasks.findUnique({
+      where: { id },
+    });
+
+    if (!taskFound) {
+      throw new NotFoundException('Não foi possível encontrar nenhuma tarefa!');
+    }
+
+    const task = await this.prisma.tasks.update({
+      data: {
+        status: statusTaskDto.status as unknown as Status,
+      },
+      where: { id, userId:req.tokenPayload.sub },
+    });
+    
+    return {
+      data: task,
+    };
   }
 }
