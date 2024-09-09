@@ -1,85 +1,96 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Projeto Backend - Gerenciamento de Tarefas
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este projeto é um backend desenvolvido com NestJS que gerencia tarefas. Ele utiliza autenticação JWT, criptografia de senhas com bcrypt e o Prisma ORM para manipulação do banco de dados.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos
 
-## Description
+- Node.js (v16 ou superior)
+- Yarn ou NPM
+- MySQL (ou outro banco de dados configurado no Prisma)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Instalação
 
-## Project setup
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/emeps/taskapp-backend.git
+cd taskapp-backend
+```
+2. Instale as dependência:
 
 ```bash
 $ yarn install
+# ou 
+$ npm install
 ```
+3. Configure as variáveis de ambiente.
 
-## Compile and run the project
+Copie o arquivo .env.example e renomeie para .env:
+```bash
+DATABASE_URL="mysql://username:password@localhost:3306/nome_do_banco?schema=public"
+```
+Substitua username e password pelos dados do seu banco. Crie um database e substitua me nome_do_banco na string acima.
+Certifique-se de configurar corretamente as credenciais do banco de dados.
+
+4. Execute as migrations do Prisma para criar o banco de dados:
+```bash
+$ npx prisma migrate dev
+```
+5. Inicie o servidor:
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+$ yarn start:dev
+# ou
+$ npm run start:dev
 ```
 
-## Run tests
+O servidor estará rodando em http://localhost:3001.
 
-```bash
-# unit tests
-$ yarn run test
+## Endpoints
+### Autenticação
+- **POST** /auth/register - Cadastro de usuário
+- **POST** /auth/login - Login (retorna o token JWT)
+### Tarefas
+- **GET** /task - Lista todas as tarefas (necessário JWT)
+- **POST** /task - Cria uma nova tarefa (necessário JWT)
+- **PATCH** /task/:id - Atualiza uma tarefa existente (necessário JWT)
+- **DELETE** /task/:id - Deleta uma tarefa (necessário JWT)
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+## Exemplos
+### Registro de Usuário
+```json
+POST /auth/register
+{
+  "name": "Seu Nome",
+  "email": "email@exemplo.com",
+  "password": "sua_senha"
+}
 ```
 
-## Resources
+### Login de Usuário
+```json
+POST /auth/login
+{
+  "email": "email@exemplo.com",
+  "password": "sua_senha"
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Criar Tarefas
+```json
+POST /task
+Headers: Authorization: Bearer seu_token_jwt
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+{
+  "title": "Minha nova tarefa",
+  "description": "Descrição da tarefa",
+  "status": "PENDING"
+}
 
-## Support
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Tecnologias Utilizadas
+- **NestJS**: Framework para a construção de aplicações Node.js
+- **Prisma**: ORM para interagir com o banco de dados
+- **JWT**: Autenticação baseada em tokens
+- **Bcrypt**: Criptografia de senhas
