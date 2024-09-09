@@ -1,4 +1,4 @@
-import { Length , IsString, IsEnum, IsInt, IsOptional, IsNotEmpty} from "class-validator";
+import { Length , IsString, IsEnum, IsOptional, IsNotEmpty} from "class-validator";
 
 export enum TaskStatus{
     PENDING = 'PENDING',
@@ -20,6 +20,4 @@ export class CreateTaskDto {
     @IsEnum(TaskStatus)
     status: TaskStatus;
 
-    @IsInt()
-    userId: number;
 }
